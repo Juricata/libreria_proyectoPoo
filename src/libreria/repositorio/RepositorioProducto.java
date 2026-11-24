@@ -79,7 +79,6 @@ public class RepositorioProducto implements Repositorio<ProductoEditorial> {
     /**
      * Elimina un producto mediante su identificador.
      */
-    @Override
     public void eliminar(int id) {
 
         if (!productos.containsKey(id)) {

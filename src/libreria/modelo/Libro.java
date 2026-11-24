@@ -1,6 +1,8 @@
 package libreria.modelo;
 
+import libreria.enums.Categoria;
 import libreria.enums.Genero;
+import libreria.excepciones.DatosInvalidosException;
 
 public class Libro extends ProductoEditorial {
 	
@@ -42,26 +44,26 @@ public class Libro extends ProductoEditorial {
     public void setNumeroPaginas(int numeroPaginas) {
 
         if (numeroPaginas <= 0) 
-            throw new IllegalArgumentException("El numero de paginas debe ser positivo");
+            throw new DatosInvalidosException("El numero de paginas debe ser positivo");
         this.numeroPaginas = numeroPaginas;
     }
 
     public void setEdicion(int edicion) {
 
         if (edicion <= 0) 
-            throw new IllegalArgumentException("La edicion debe ser positiva");
+            throw new DatosInvalidosException("La edicion debe ser positiva");
         this.edicion = edicion;
     }
     
     public void setGenero(Genero genero) {
         if (genero == null) 
-            throw new IllegalArgumentException("Debe seleccionar un genero");
+            throw new DatosInvalidosException("Debe seleccionar un genero");
         this.genero = genero;
     }
     
     public void setISBN(String ISBN) {
         if (ISBN == null || ISBN.trim().isEmpty())
-            throw new IllegalArgumentException("El ISBN no puede estar vacio");
+            throw new DatosInvalidosException("El ISBN no puede estar vacio");
         this.ISBN = ISBN;
     }
 
@@ -75,4 +77,10 @@ public class Libro extends ProductoEditorial {
                 "\nEdicion: " + edicion +
                 "\nPrecio: $" + getPrecioVenta();
     }
+
+	@Override
+	public Categoria getCategoria() {
+		// TODO Auto-generated method stub
+		return Categoria.LIBRO;
+	}
 }

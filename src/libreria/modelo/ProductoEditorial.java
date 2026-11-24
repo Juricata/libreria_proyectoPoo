@@ -1,6 +1,9 @@
 package libreria.modelo;
 
-public class ProductoEditorial implements Comparable<ProductoEditorial>{
+import libreria.enums.Categoria;
+import libreria.excepciones.DatosInvalidosException;
+
+public  abstract class ProductoEditorial implements Comparable<ProductoEditorial>{
     private int idProducto;
     private String titulo;
     private double precioVenta;
@@ -12,7 +15,9 @@ public class ProductoEditorial implements Comparable<ProductoEditorial>{
         setPrecioVenta(precioVenta);
         setEditorial(editorial);
     }
-
+    
+    public abstract Categoria getCategoria();
+    
     // Getters
     public int getIdProducto() {
         return idProducto;
@@ -33,25 +38,29 @@ public class ProductoEditorial implements Comparable<ProductoEditorial>{
     // Setters 
     public void setIdProducto(int idProducto) {
         if (idProducto <= 0) 
-            throw new IllegalArgumentException("El ID debe ser positivo");
+            throw new DatosInvalidosException("El ID debe ser positivo");
         this.idProducto = idProducto;
     }
 
-    public void setTitulo(String titulo) {
-        if (titulo == null || titulo.trim().isEmpty()) 
-            throw new IllegalArgumentException("El titulo no puede estar vacio");
-        this.titulo = titulo;
+public void setTitulo(String titulo) {
+
+    if (titulo == null || titulo.trim().isEmpty()) {
+        throw new DatosInvalidosException("El titulo no puede estar vacio");
     }
+
+    this.titulo = titulo;
+}
+
 
     public void setPrecioVenta(double precioVenta) {
         if (precioVenta < 0) 
-            throw new IllegalArgumentException("El precio no puede ser negativo");
+            throw new DatosInvalidosException("El precio no puede ser negativo");
         this.precioVenta = precioVenta;
     }
 
     public void setEditorial(Editorial editorial) {
         if (editorial == null) 
-            throw new IllegalArgumentException("Debe especificarse una editorial");
+            throw new DatosInvalidosException("Debe especificarse una editorial");
         this.editorial = editorial;
     }
 
@@ -67,5 +76,19 @@ public class ProductoEditorial implements Comparable<ProductoEditorial>{
     @Override
     public int compareTo(ProductoEditorial otro) {
         return this.titulo.compareToIgnoreCase(otro.titulo);
+    }
+    
+    @Override
+	public boolean equals(Object o) {
+		if(o instanceof ProductoEditorial) {
+			ProductoEditorial p= (ProductoEditorial)o;
+			return idProducto == p.getIdProducto() && titulo.equals(p.getTitulo()) && precioVenta == p.getPrecioVenta() && editorial.equals(p.getEditorial()) && getCategoria() == p.getCategoria() ;
+		}
+		return false;
+	}
+
+    @Override
+    public int hashCode() {
+        return idProducto;
     }
 }

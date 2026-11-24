@@ -1,7 +1,8 @@
 package libreria.inventario;
 
 import libreria.modelo.ProductoEditorial;
-
+import libreria.excepciones.DatosInvalidosException;
+import libreria.excepciones.ExistenciasInsuficientesException ;
 public class Existencia{
 
     private ProductoEditorial producto;
@@ -26,13 +27,13 @@ public class Existencia{
 
     public void setProducto(ProductoEditorial producto) {
         if (producto == null) 
-            throw new IllegalArgumentException("El producto no puede ser nulo");
+            throw new DatosInvalidosException("El producto no puede ser nulo");
         this.producto = producto;
     }
 
     public void setCantidad(int cantidad) {
         if (cantidad < 0) 
-            throw new IllegalArgumentException("La cantidad no puede ser negativa");
+            throw new 	DatosInvalidosException("La cantidad no puede ser negativa");
         this.cantidad = cantidad;
     }
 
@@ -40,17 +41,17 @@ public class Existencia{
 
     public void agregarCantidad(int cantidad) {
         if (cantidad <= 0) 
-            throw new IllegalArgumentException("La cantidad debe ser positiva");
+            throw new DatosInvalidosException("La cantidad debe ser positiva");
         this.cantidad += cantidad;
     }
 
     // Retirar unidades del inventario
 
-    public void retirarCantidad(int cantidad) {
+    public void retirarCantidad(int cantidad) throws ExistenciasInsuficientesException {
         if (cantidad <= 0) 
-            throw new IllegalArgumentException("La cantidad debe ser positiva");
+            throw new DatosInvalidosException("La cantidad debe ser positiva");
         else if (cantidad > this.cantidad)
-            throw new IllegalArgumentException("No hay suficientes existencias");
+            throw new ExistenciasInsuficientesException(this.cantidad,cantidad);
         this.cantidad -= cantidad;
     }
 

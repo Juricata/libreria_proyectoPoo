@@ -1,5 +1,7 @@
 package libreria.modelo;
 
+import libreria.excepciones.DatosInvalidosException;
+
 public class ProductoAutor{
     private ProductoEditorial producto;
     private Autor autor;
@@ -28,20 +30,20 @@ public class ProductoAutor{
     // Setters
     public void setProducto(ProductoEditorial producto) {
         if (producto == null) 
-        	throw new IllegalArgumentException("El producto no puede ser nulo");
+        	throw new DatosInvalidosException("El producto no puede ser nulo");
         this.producto = producto;
     }
 
     public void setAutor(Autor autor) {
         if (autor == null) 
-            throw new IllegalArgumentException("El autor no puede ser nulo");
+            throw new DatosInvalidosException("El autor no puede ser nulo");
         this.autor = autor;
     }
 
     public void setRol(String rol) {
 
         if (rol == null || rol.trim().isEmpty()) 
-            throw new IllegalArgumentException("El rol no puede estar vacio");
+            throw new DatosInvalidosException("El rol no puede estar vacio");
         this.rol = rol;
     }
 

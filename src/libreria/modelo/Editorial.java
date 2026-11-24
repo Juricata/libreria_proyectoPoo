@@ -1,5 +1,7 @@
 package libreria.modelo;
 
+import libreria.excepciones.DatosInvalidosException;
+
 public class Editorial{
     private int idEditorial;
     private String nombre;
@@ -28,19 +30,19 @@ public class Editorial{
     // Setters
     public void setIdEditorial(int idEditorial) {
         if (idEditorial <= 0) 
-            throw new IllegalArgumentException("El ID de la editorial debe ser positivo");
+            throw new DatosInvalidosException("El ID de la editorial debe ser positivo");
         this.idEditorial = idEditorial;
     }
 
     public void setNombre(String nombre) {
         if (nombre == null || nombre.trim().isEmpty()) 
-            throw new IllegalArgumentException("El nombre de la editorial no puede estar vacio");
+            throw new DatosInvalidosException("El nombre de la editorial no puede estar vacio");
         this.nombre = nombre;
     }
 
     public void setPais(String pais) {
         if (pais == null || pais.trim().isEmpty()) 
-            throw new IllegalArgumentException("El pais no puede estar vacio");
+            throw new DatosInvalidosException("El pais no puede estar vacio");
         this.pais = pais;
     }
 

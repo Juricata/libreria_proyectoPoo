@@ -1,6 +1,8 @@
 package libreria.modelo;
 
+import libreria.enums.Categoria;
 import libreria.enums.Genero;
+import libreria.excepciones.DatosInvalidosException;
 
 public class Revista extends ProductoEditorial {
     private String ISSN;
@@ -40,26 +42,26 @@ public class Revista extends ProductoEditorial {
     // Setters
     public void setISSN(String ISSN) {
         if (ISSN == null || ISSN.trim().isEmpty()) 
-            throw new IllegalArgumentException("El ISSN no puede estar vacio");
+            throw new DatosInvalidosException("El ISSN no puede estar vacio");
         this.ISSN = ISSN;
     }
 
     public void setNumeroEdicion(int numeroEdicion) {
         if (numeroEdicion <= 0) 
-            throw new IllegalArgumentException("El numero de edicion debe ser positivo");
+            throw new DatosInvalidosException("El numero de edicion debe ser positivo");
         this.numeroEdicion = numeroEdicion;
     }
 
     public void setVolumen(int volumen) {
         if (volumen <= 0) 
-            throw new IllegalArgumentException("El volumen debe ser positivo");
+            throw new DatosInvalidosException("El volumen debe ser positivo");
         this.volumen = volumen;
     }
 
     public void setPeriodicidad(String periodicidad) {
 
         if (periodicidad == null || periodicidad.trim().isEmpty())
-            throw new IllegalArgumentException("Debe especificar la periodicidad");
+            throw new DatosInvalidosException("Debe especificar la periodicidad");
         this.periodicidad = periodicidad;
     }
 
@@ -73,4 +75,9 @@ public class Revista extends ProductoEditorial {
                 "\nPeriodicidad: " + periodicidad +
                 "\nPrecio: $" + getPrecioVenta();
     }
+
+	@Override
+	public Categoria getCategoria() {
+		return Categoria.REVISTA;
+	}
 }

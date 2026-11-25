@@ -1,0 +1,11 @@
+# tipo;id;titulo;precio;idEditorial;editorial;pais;existencias;datos propios del tipo
+LIBRO;1;Cien años de soledad;399.0;1;Diana;Mexico;8;978-0307474728;496;1;NOVELA
+LIBRO;2;1984;289.0;2;Debolsillo;España;5;978-8499890944;352;3;CIENCIA_FICCION
+LIBRO;3;Pedro Páramo;199.0;3;RM;Mexico;10;978-6070701845;128;2;NOVELA
+LIBRO;4;El Hobbit;349.0;4;Minotauro;España;4;978-6070731552;320;1;FANTASIA
+LIBRO;5;Sapiens;459.0;5;Debate;Mexico;6;978-6073155874;496;1;HISTORIA
+REVISTA;6;National Geographic en Español;120.0;6;Televisa;Mexico;12;1665-0115;245;21;Mensual
+REVISTA;7;Muy Interesante;95.0;6;Televisa;Mexico;9;0188-6304;512;43;Mensual
+COMIC;8;Batman: Año Uno;279.0;7;Panini;Mexico;3;Batman;1;1;Novela grafica;OTRO
+COMIC;9;Spider-Man: Azul;259.0;7;Panini;Mexico;4;Spider-Man;1;1;Miniserie;ROMANCE
+COMIC;10;Mafalda 1;189.0;8;Lumen;Argentina;7;Mafalda;1;1;Tira comica;OTRO

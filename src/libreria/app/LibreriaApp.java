@@ -19,6 +19,7 @@ import libreria.modelo.Editorial;
 import libreria.modelo.Libro;
 import libreria.modelo.ProductoEditorial;
 import libreria.modelo.Revista;
+import libreria.repositorio.ArchivoCatalogo;
 import libreria.repositorio.RepositorioProducto;
 import libreria.repositorio.RepositorioVenta;
 import libreria.ventas.Carrito;
@@ -37,6 +38,7 @@ public class LibreriaApp {
     private final Inventario inventario = new Inventario();
     private final RepositorioProducto repositorioProductos = new RepositorioProducto();
     private final RepositorioVenta repositorioVentas = new RepositorioVenta();
+    private final ArchivoCatalogo archivoCatalogo = new ArchivoCatalogo(ArchivoCatalogo.RUTA_POR_DEFECTO);
     private int siguienteIdCarrito = 1;
 
     public static void main(String[] args) {
@@ -49,12 +51,24 @@ public class LibreriaApp {
         System.out.println("              LIBRERIA");
         System.out.println("========================================");
 
-        int tipoUsuario = seleccionarTipoUsuario();
-        if (tipoUsuario == 0) {
-            System.out.println("Gracias por utilizar el sistema.");
-            return;
-        }
+        cargarCatalogo();
 
+        // Ciclo externo: al cerrar sesion se regresa a elegir usuario en lugar
+        // de terminar el programa. Asi los repositorios (que viven en memoria
+        // mientras el programa esta abierto) conservan lo que se registro.
+        int tipoUsuario = seleccionarTipoUsuario();
+        while (tipoUsuario != 0) {
+            atenderUsuario(tipoUsuario);
+            tipoUsuario = seleccionarTipoUsuario();
+        }
+        System.out.println("Gracias por utilizar el sistema.");
+    }
+
+    /**
+     * Muestra el menu del tipo de usuario elegido hasta que cierre sesion (opcion 0).
+     * 1 = Cliente, 2 = Propietario.
+     */
+    private void atenderUsuario(int tipoUsuario) {
         boolean continuar = true;
         while (continuar) {
             if (tipoUsuario == 1) {
@@ -105,7 +119,7 @@ public class LibreriaApp {
                             break;
                         case 0:
                             continuar = false;
-                            System.out.println("Gracias por utilizar el sistema.");
+                            System.out.println("Sesion de propietario cerrada.");
                             break;
                         default:
                             System.out.println("Opcion no valida.");
@@ -131,7 +145,7 @@ public class LibreriaApp {
             System.out.println("\n--------------- TIPO DE USUARIO ---------------");
             System.out.println("1. Cliente");
             System.out.println("2. Propietario");
-            System.out.println("0. Salir");
+            System.out.println("0. Salir del sistema");
             System.out.println("-----------------------------------------------");
 
             int opcion = leerEntero("¿Como deseas ingresar? ");
@@ -147,7 +161,7 @@ public class LibreriaApp {
         System.out.println("1. Mostrar catalogo");
         System.out.println("2. Buscar producto");
         System.out.println("3. Comprar producto");
-        System.out.println("0. Salir");
+        System.out.println("0. Cerrar sesion");
         System.out.println("--------------------------------------------");
     }
 
@@ -159,7 +173,7 @@ public class LibreriaApp {
         System.out.println("4. Eliminar producto");
         System.out.println("5. Consultar ventas e ingresos");
         System.out.println("6. Exportar ventas a CSV");
-        System.out.println("0. Salir");
+        System.out.println("0. Cerrar sesion");
         System.out.println("--------------------------------------------");
     }
 
@@ -213,6 +227,7 @@ public class LibreriaApp {
         repositorioProductos.guardar(producto);
         catalogo.agregarProducto(producto);
         inventario.registrarProducto(producto, cantidad);
+        guardarCatalogo();
         System.out.println("Producto registrado correctamente:");
         System.out.println(producto);
     }
@@ -252,6 +267,7 @@ public class LibreriaApp {
             int cantidad = leerEntero("Cantidad: ");
             if (opcion == 1) inventario.agregarUnidades(id, cantidad);
             else inventario.retirarUnidades(id, cantidad);
+            guardarCatalogo();
             System.out.println("Inventario actualizado. Existencias actuales: "
                     + inventario.consultarCantidad(id));
         }
@@ -271,6 +287,7 @@ public class LibreriaApp {
         repositorioProductos.eliminar(id);
         catalogo.eliminarProducto(id);
         inventario.eliminarProducto(id);
+        guardarCatalogo();
         System.out.println("Producto eliminado: " + producto.getTitulo());
     }
 
@@ -286,7 +303,7 @@ public class LibreriaApp {
         boolean agregando = true;
 
         while (agregando) {
-            mostrarCatalogo();
+            mostrarCatalogoCompacto();
             int id = leerEntero("ID del producto (0 para terminar): ");
             if (id == 0) break;
             ProductoEditorial producto = repositorioProductos.buscarPorId(id)
@@ -328,6 +345,7 @@ public class LibreriaApp {
         for (DetalleCarrito detalle : carrito.getDetalles()) {
             inventario.retirarUnidades(detalle.getProducto().getIdProducto(), detalle.getCantidad());
         }
+        guardarCatalogo(); // las existencias bajaron
         venta.confirmar();
         repositorioVentas.guardar(venta);
         System.out.println("\n¡Venta registrada y confirmada!");
@@ -359,6 +377,66 @@ public class LibreriaApp {
         }
     }
 
+    /**
+     * Tabla corta del catalogo (ID, tipo, titulo, precio y existencias) para
+     * que el cliente vea el ID que tiene que escribir al comprar.
+     */
+    private void mostrarCatalogoCompacto() {
+        List<ProductoEditorial> productos = repositorioProductos.cargarTodos();
+        if (productos.isEmpty()) {
+            System.out.println("No hay productos registrados.");
+            return;
+        }
+        System.out.println();
+        System.out.printf("%4s  %-8s  %-34s  %9s  %6s%n", "ID", "TIPO", "TITULO", "PRECIO", "DISP.");
+        System.out.println("-------------------------------------------------------------------------");
+        for (ProductoEditorial producto : productos) {
+            String disponibles;
+            try {
+                disponibles = String.valueOf(inventario.consultarCantidad(producto.getIdProducto()));
+            } catch (ProductoNoEncontradoException e) {
+                disponibles = "-";
+            }
+            System.out.printf("%4d  %-8s  %-34.34s  $%8.2f  %6s%n",
+                    producto.getIdProducto(), producto.getCategoria(),
+                    producto.getTitulo(), producto.getPrecioVenta(), disponibles);
+        }
+        System.out.println();
+    }
+
+    /**
+     * Al iniciar: si ya existe el archivo del catalogo lo lee; si es la
+     * primera vez, carga los 10 productos de ejemplo y crea el archivo.
+     */
+    private void cargarCatalogo() {
+        try {
+            if (archivoCatalogo.existe()) {
+                int cargados = archivoCatalogo.cargarEn(repositorioProductos, catalogo, inventario);
+                System.out.println("Catalogo cargado: " + cargados + " productos.");
+            } else {
+                int cargados = ArchivoCatalogo.cargarEjemplos(repositorioProductos, catalogo, inventario);
+                guardarCatalogo();
+                System.out.println("Primera ejecucion: se cargaron " + cargados
+                        + " productos de ejemplo.");
+            }
+        } catch (IOException e) {
+            System.out.println("No se pudo leer el catalogo (" + e.getMessage()
+                    + "). Se inicia con el catalogo vacio.");
+        }
+    }
+
+    /**
+     * Guarda el catalogo y las existencias en el archivo. Se llama despues de
+     * cada cambio: registrar, eliminar, mover inventario o vender.
+     */
+    private void guardarCatalogo() {
+        try {
+            archivoCatalogo.guardar(inventario);
+        } catch (IOException e) {
+            System.out.println("Aviso: no se pudo guardar el catalogo: " + e.getMessage());
+        }
+    }
+
     private Genero leerGenero() {
         Genero[] generos = Genero.values();
         System.out.println("Generos disponibles:");
@@ -374,6 +452,7 @@ public class LibreriaApp {
 
     private void imprimirProducto(ProductoEditorial producto) {
         System.out.println("----------------------------------------");
+        System.out.println("ID: " + producto.getIdProducto());
         System.out.println(producto);
         System.out.println("Categoria: " + producto.getCategoria());
         try {
